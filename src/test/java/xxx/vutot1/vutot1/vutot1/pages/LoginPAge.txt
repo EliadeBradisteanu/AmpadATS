@@ -1,0 +1,75 @@
+package de.bund.bka.idvk.vutot.pages;
+
+
+import de.bund.bka.idvk.vutot.util.BasePageFactory;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
+import net.serenitybdd.core.pages.WebElementFacade;
+import org.junit.Assert;
+import org.openqa.selenium.support.FindBy;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+
+import static de.bund.bka.idvk.vutot.util.Constants.*;
+
+@EqualsAndHashCode(callSuper = true)
+@Slf4j
+@Data
+public class LoginPage extends CommonPage{
+
+    static {
+        BasePageFactory.register(LoginPage.class.getSimpleName(), new LoginPage(), LoginPage.class.getDeclaredFields());
+    }
+
+    private String benutzername ="#LoginForm\\:login_username";
+    private String passwort = "#LoginForm\\:login_password";
+    private String anmelden = "#controlButtons";
+
+    @FindBy(id = "actual_events_dialog")
+    private WebElementFacade dialog;
+
+    @FindBy(css = "#actual_events_all button")
+    private WebElementFacade dialogButton;
+
+    @FindBy(tagName = "legend")
+    private WebElementFacade legend;
+
+    private CommonPage commonPage;
+
+    public String getFieldValueFromThisClass(String fieldName){
+
+        Field field = Arrays.stream(LoginPage.class.getDeclaredFields())
+                .filter(f -> f.getName().equals(fieldName))
+                .findFirst().orElse(null);
+
+        try {
+            assert field != null;
+            return (String) field.get(this);
+        } catch (IllegalAccessException e) {
+            log.error("Sorry, unable to get the field value" , e);
+        }
+
+        return null;
+    }
+
+
+    public void userSeesAndClosesTheDialog() {
+        waitForElement(dialog);
+        Assert.assertTrue(dialog.getText().contains(AFTER_LOGIN_DIALOG));
+        clickOn(dialogButton);
+    }
+
+    public void userIsOnLoginPage() {
+        Assert.assertEquals(ANMELDUNG,legend.getText());
+    }
+
+    public void userLogsin() {
+        openLoginPage();
+        commonPage.userEntersInInputField(BENUTZERNAME, properties.getProperty("username"));
+        commonPage.userEntersInInputField(PASSWORT, properties.getProperty("password"));
+        commonPage.userClicks(ANMELDEN);
+        userSeesAndClosesTheDialog();
+    }
+}

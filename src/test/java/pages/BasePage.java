@@ -10,6 +10,7 @@ import util.PropertyManager;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class BasePage extends PageObject {
 
@@ -59,7 +60,7 @@ public class BasePage extends PageObject {
     protected WebElement getWebElementFromListByAttribute(List<WebElement> elements, String attribute, String text) {
         return elements.stream()
                 .filter(t -> (t.getAttribute(attribute) != null))
-                .filter(e -> e.getAttribute(attribute).contains(text))//equals(text))
+                .filter(e -> e.getAttribute(attribute).equals(text))//equals(text))
                 .findAny().orElse(null);
     }
 
@@ -152,5 +153,13 @@ public class BasePage extends PageObject {
         }
 
         return selector.trim();
+    }
+
+    static void pause(Integer milliseconds){
+        try {
+            TimeUnit.MILLISECONDS.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

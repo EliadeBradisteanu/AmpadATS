@@ -1,0 +1,249 @@
+package de.bund.bka.idvk.vutot.pages;
+
+import lombok.extern.slf4j.Slf4j;
+import net.serenitybdd.core.pages.WebElementFacade;
+import net.thucydides.core.pages.PageObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.support.FindBy;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+@Slf4j
+@SuppressWarnings("unused")
+public class BasePage extends PageObject {
+
+    static Properties properties;
+    private JavascriptExecutor js = (JavascriptExecutor) getDriver();
+
+    static{
+        try (InputStream input = LoginPage.class.getClassLoader().getResourceAsStream("general.properties") ) {
+
+            if (input == null) {
+                log.info("Sorry, unable to find dictionary.properties");
+            }
+
+            properties = new Properties();
+            // load a properties file
+            properties.load(input);
+
+        } catch (IOException ex) {
+            log.error("Sorry, unable to load general.properties" , ex);
+        }
+    }
+
+    @FindBy(tagName = "body")
+    private WebElementFacade body;
+
+    //methods to be overriding in page subclasses for polymorphic calls
+    public String getFieldValueFromThisClass(String fieldName){
+        Field field = Arrays.stream(BasePage.class.getDeclaredFields())
+                .filter(f -> f.getName().equals(fieldName))
+                .findFirst().orElse(null);
+
+        try {
+            assert field != null;
+            return (String) field.get(this);
+        } catch (IllegalAccessException e) {
+            log.error("Sorry, unable to get the field value" , e);
+        }
+        return null;
+    }
+    //End of methods for polymorphic calls
+
+
+    //BasePage methods
+    void openLoginPage() {this.open(); }
+
+    WebElementFacade getBody() {
+        return body;
+    }
+
+    void pressEnter(WebElementFacade webElementFacade){
+        webElementFacade.sendKeys(Keys.ENTER);
+    }
+
+    protected void pressArrowDown(WebElementFacade webElementFacade){
+        webElementFacade.sendKeys(Keys.ARROW_DOWN);
+    }
+
+    protected void hoverOverElement(WebElementFacade webElementFacade){
+        withAction().moveToElement(webElementFacade).build().perform();
+    }
+
+    //offset top left corner of the element
+    void moveToAndClick(WebElementFacade webElementFacade, int x, int y){
+        withAction().moveToElement(webElementFacade ,x ,y).click().build().perform();
+    }
+
+    void scrollIntoView(WebElementFacade webElementFacade){
+        if(js == null)
+            js = (JavascriptExecutor)getDriver();
+
+        js.executeScript("argumets[0].scrollIntoView(true);", webElementFacade);
+    }
+
+    //x - horizontal ; y - vertical
+    void scrollBy(int x, int y){
+        if(js == null)
+            js = (JavascriptExecutor)getDriver();
+
+        js.executeScript("window.scrollBy(" + x + ","+ y +")");
+    }
+
+    protected Boolean isWEFacadeDisabled(WebElementFacade webElementFacade){
+        if(js == null)
+            js = (JavascriptExecutor)getDriver();
+
+        return (Boolean)js.executeScript("return arguments[0].hasAttribute(\"disabled\")", webElementFacade);
+    }
+
+
+    WebElementFacade getWEFFromListByText(List<WebElementFacade> elements, String text) {
+        //waitForListOfElement(elements);
+        elements.removeAll(Collections.singleton(null));
+
+        return elements.stream()
+                       .filter(e -> e.getText().replaceAll("[\\t\\n\\r]+"," ").equals(text))
+                       .findAny().orElse(null);
+    }
+
+    WebElementFacade getWEFFromListByTextSkipingNElements(List<WebElementFacade> elements, String text, long nthElement) {
+        //waitForListOfElement(elements);
+        elements.removeAll(Collections.singleton(null));
+
+        return elements.stream()
+                .filter(e -> e.getText().replaceAll("[\\t\\n\\r]+"," ").equals(text))
+                .skip(nthElement - 1)
+                .findAny().orElse(null);
+    }
+
+    //used  for first entry in a subTable, delete the subtable header
+    WebElementFacade getWEFFromListByTextRemovingText(List<WebElementFacade> elements, String text, String textToTemove ) {
+        //waitForListOfElement(elements);
+        elements.removeAll(Collections.singleton(null));
+
+        return elements.stream()
+                .filter(e -> e.getText().replaceAll("[\\t\\n\\r\\s]+","").replaceAll(textToTemove,"").equals(text))
+                .findAny().orElse(null);
+    }
+
+    WebElementFacade getWEFFromListByContainingText(List<WebElementFacade> elements, String text) {
+        //waitForListOfElement(elements);
+        elements.removeAll(Collections.singleton(null));
+
+        return elements.stream()
+                .filter(e -> e.getText().contains(text))
+                .findAny().orElse(null);
+    }
+
+
+
+    List<WebElementFacade> getWEFsFromListByText(List<WebElementFacade> elements, List<String> texts) {
+        //waitForListOfElement(elements);
+        elements.removeAll(Collections.singleton(null));
+
+        return elements.stream()
+                .filter(uio -> texts.stream()
+                                    .anyMatch( o -> uio.getText().equals(o)))
+                .collect(Collectors.toList());
+    }
+
+    WebElementFacade getWEFFromListByAttribute(List<WebElementFacade> elements, String attribute, String text) {
+        waitForListOfElement(elements);
+        elements.removeAll(Collections.singleton(null));
+
+        return elements.stream()
+                .filter(t -> (t.getAttribute(attribute) != null))
+                .filter(e -> e.getAttribute(attribute).contains(text))  //better equals(text)
+                .findAny().orElse(null);
+    }
+
+    WebElementFacade getDisplayedWEF(String cssValue){
+        return findAll(By.cssSelector(cssValue)).stream()
+                .filter(WebElementFacade::isDisplayed)
+                .findFirst().orElse(null);
+    }
+
+    List<WebElementFacade> getDisplayedWEFs(String cssValue){
+        return findAll(By.cssSelector(cssValue)).stream()
+                .filter(WebElementFacade::isDisplayed)
+                .collect(Collectors.toList());
+    }
+
+
+    private void waitForSelector(String selector) {
+        if (selector != null) {
+            waitForRenderedElementsToBePresent(By.cssSelector(selector));
+        } else {
+            waitABit(1500);
+        }
+    }
+
+
+    void waitForElement(WebElementFacade element) {
+        waitForSelector(parseSelector(element.toString()));
+    }
+
+    void waitForListOfElement(List<WebElementFacade> elements) {
+       waitForSelector(parseSelector(elements.toString()));
+    }
+
+
+    /**
+     * Parses the "toString" of a WebElementFacade to a valid selector.
+     *
+     * @param toStringSelector selector of a WebElementFacade
+     * @return selector
+     */
+
+    private String parseSelector(String toStringSelector) {
+        String[] splitSelector = toStringSelector.split("->");
+        if (splitSelector.length < 2) {
+            return null;
+        }
+
+        String selector = splitSelector[1].split("],\\s")[0];
+        selector = selector.replaceFirst("\\.*?", "").trim();
+
+        if (selector.endsWith("]")) {
+            selector = selector.substring(0, selector.length() - 1);
+        }
+
+        String selectorTyp = selector.substring(0, 3);
+        switch (selectorTyp) {
+            case "id:":
+                selector = selector.replaceFirst("id:\\s", "#");
+                break;
+            case "css":
+                selector = selector.replaceFirst("css selector:\\s", "");
+                break;
+            default:
+                String[] split = selector.split(":");
+                if (split.length > 1) {
+                    selector = split[1];
+                }
+                break;
+        }
+        return selector.trim();
+    }
+
+    static void pause(Integer milliseconds){
+        try {
+            TimeUnit.MILLISECONDS.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+}

@@ -1,6 +1,8 @@
 package stepdefinitions;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import net.thucydides.core.annotations.Steps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +15,5 @@ public class LoginSD {
     @Steps
     LoginS loginS;
 
-    @Given("^user logs into the Apmapada Home Page$")
-    public void userLogsIntoTheApmapadaHomePage() {
-        loginS.userLogsIntoTheApmapadaHomePage();
-        logger.info("user logs into the Apmapada Home Page");
-    }
+
 }

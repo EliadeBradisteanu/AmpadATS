@@ -1,0 +1,44 @@
+@Login
+Feature: Anmelden
+
+  @Login
+  Scenario:  Der Benutzer meldet sich im Portal an
+    Given  Der Benutzer ruft die Vutot Anmeldeseite auf
+
+    #Only username
+    And Der Benutzer gibt in Eingabefeld "benutzername" "haghnazarian" ein
+    And Der Benutzer klickt auf "anmelden"
+    Then Der Benutzer sieht eine Fehlermeldung
+
+    #Only password
+    And Der Benutzer gibt in Eingabefeld "benutzername" "" ein
+    And Der Benutzer gibt in Eingabefeld "passwort" "test123" ein
+    And Der Benutzer klickt auf "anmelden"
+    Then Der Benutzer sieht eine Fehlermeldung
+
+    #Wrong username corect password
+    And Der Benutzer gibt in Eingabefeld "benutzername" "haghnazarianX" ein
+    And Der Benutzer gibt in Eingabefeld "passwort" "test123" ein
+    And Der Benutzer klickt auf "anmelden"
+    Then Der Benutzer sieht eine Fehlermeldung
+
+    #Corect username wrong password
+    And Der Benutzer gibt in Eingabefeld "benutzername" "haghnazarian" ein
+    And Der Benutzer gibt in Eingabefeld "passwort" "test123X" ein
+    And Der Benutzer klickt auf "anmelden"
+    Then Der Benutzer sieht eine Fehlermeldung
+
+    #Wrong username wrong password
+    And Der Benutzer gibt in Eingabefeld "benutzername" "haghnazarianX" ein
+    And Der Benutzer gibt in Eingabefeld "passwort" "test123X" ein
+    And Der Benutzer klickt auf "anmelden"
+    Then Der Benutzer sieht eine Fehlermeldung
+
+    #Corect username corect password
+    And Der Benutzer gibt in Eingabefeld "benutzername" "haghnazarian" ein
+    And Der Benutzer gibt in Eingabefeld "passwort" "test123" ein
+    And Der Benutzer klickt auf "anmelden"
+    Then Der Benutzer sieht und schliesst die Meldung
+    Then Der Benutzer klickt das Menue "Logout"
+    Then Der Benutzer ist auf der Anmeldeseite
+

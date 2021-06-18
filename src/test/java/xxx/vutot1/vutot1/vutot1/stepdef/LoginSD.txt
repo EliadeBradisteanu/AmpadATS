@@ -1,0 +1,28 @@
+package de.bund.bka.idvk.vutot.steps;
+
+import de.bund.bka.idvk.vutot.pages.LoginPage;
+import lombok.extern.slf4j.Slf4j;
+import net.thucydides.core.annotations.Step;
+
+
+@Slf4j
+@SuppressWarnings("unused")
+public class LoginS {
+
+    private LoginPage loginPage;
+
+    @Step("Der Benutzer sieht und schliesst die Meldung")
+    public void userSeesAndClosesTheDialog() {
+        loginPage.userSeesAndClosesTheDialog();
+    }
+
+    @Step("Der Benutzer ist auf der Anmeldeseite")
+    public void userIsOnLoginPage() {
+        loginPage.userIsOnLoginPage();
+    }
+
+    @Step("Der Benutzer meldet sich auf die Vutotseite ein")
+    public void userLogsin() {
+        loginPage.userLogsin();
+    }
+}

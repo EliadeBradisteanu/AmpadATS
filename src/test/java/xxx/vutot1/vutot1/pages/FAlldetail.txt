@@ -1,0 +1,140 @@
+package de.bund.bka.idvk.vutot.pages;
+
+import de.bund.bka.idvk.vutot.util.BasePageFactory;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static de.bund.bka.idvk.vutot.util.Constants.*;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@Slf4j
+public class FalldetailsPage extends CommonPage {
+
+    static {
+        BasePageFactory.register(FalldetailsPage.class.getSimpleName(), new FalldetailsPage(), FalldetailsPage.class.getDeclaredFields());
+    }
+
+    private String fristablaufdatum = "#tab_main\\:vutotAkte_falldetails_content_protokollierung_fristablaufAm_input";
+    private String fahndungsloschungsdatum = "#tab_main\\:vutotAkte_falldetails_content_protokollierung_fahndungsloeschungAm_input";
+    private String anlass = "#tab_main\\:vutotAkte_falldetails_value_anlass_anlassAusschreibung";
+    private String zusatz_zum_anlass = "#tab_main\\:vutotAkte_falldetails_content_anlass_zusatz";
+    private String zweck = "#tab_main\\:vutotAkte_falldetails_value_zweck";
+    private String sis_fahndung_aktiv = "#tab_main\\:vutotAkte_falldetails_content_sisFahndung";
+
+    private String vermisst_seit = "#tab_main\\:vutotAkte_falldetails_content_vermisstSeit_input";
+    private String angezeigt_am = "#tab_main\\:vutotAkte_falldetails_content_angezeigtAm_input";
+    private String aufgefunden_am = "#tab_main\\:vutotAkte_falldetails_content_aufgefundenAm_input";
+    private String geschatzte_liegezeit = "#tab_main\\:vutotAkte_falldetails_value_tatumstaende_liegezeit";
+    private String motiv = "#tab_main\\:vutotAkte_falldetails_value_motiv";
+    private String ereignisort = "#tab_main\\:ereignisortListvutotAkte_falldetails_data";
+    private String hinzufugen_falldetails = "#tab_main\\:ereignisortListvutotAkte_falldetails\\:ereignisort_tableBtn_add";
+
+    //Ereignisort
+    private String kategorie = "#vutotAkte_ereignisort_value_ereignisort_kategorie";
+    private String staat_falldetails = "#vutotAkte_ereignisort_value_ereignisort_staat";
+    private String stadt_falldetails = "#vutotAkte_ereignisort_value_ereignisort_stadt";
+    private String ortsbeschreibung = "#vutotAkte_ereignisort_value_ereignisort_ortsbeschreibung";
+    private String ubernehmen_falldetails  = "#vutotAkte_ereignisort_btn_submit";
+    private String abbrechen_falldetails  = "#vutotAkte_ereignisort_btn_cancel";
+    private String entfernen_falldetails  = "#ereignisort_remove_submit";
+    private String abbrechen_delete_falldetails  = "#ereignisort_remove_cancel";
+
+    private String ortlichkeit = "#tab_main\\:vutotAkte_falldetails_value_oertlichkeiten";
+    private String tatumstande = "#tab_main\\:vutotAkte_falldetails_value_tatumstaende_tatumstand";
+    private String tatmittel = "#tab_main\\:vutotAkte_falldetails_value_tatumstaende_tatmittel";
+    private String sachverhalt = "#tab_main\\:vutotAkte_falldetails_content_sachverhalt";
+    private String bearbeitungshinweis_falldetails = "#tab_main\\:vutotAkte_falldetails_content_bearbeitungshinweis";
+    private String automatische_loschung = "#tab_main\\:vutotAkte_falldetails_content_automLoeschen";
+
+    private String bearbeitungsstand = "#tab_main\\:vutotAkte_falldetails_value_bearbeitungsstand";
+    private String internationaler_schriftverkehr = "#tab_main\\:vutotAkte_falldetails_content_internSchriftVerkehr";
+    private String freitext_falldetails = "#tab_main\\:vutotAkte_falldetails_content_freitext";
+
+
+    private CommonPage commonPage;
+
+
+    public String getFieldValueFromThisClass(String fieldName){
+        Field field = Arrays.stream(FalldetailsPage.class.getDeclaredFields())
+                .filter(f -> f.getName().equals(fieldName))
+                .findFirst().orElse(null);
+
+        try {
+            assert field != null;
+            return (String) field.get(this);
+        } catch (IllegalAccessException e) {
+            log.error("Sorry, unable to get the field value" , e);
+        }
+
+        return null;
+    }
+
+    void insertEreignisort(List<Map<String, String>> data) {
+        data.forEach(d -> {
+            String inputText = "";
+
+            if($(ereignisort).getText().equals(KEINE_EINTRAGE_ENTHALTEN))
+                userReadsFromInputText(EREIGNISORT, KEINE_EINTRAGE_ENTHALTEN);
+            else
+                inputText = $(ereignisort).getText();
+
+            userClicks(HINZUFUGEN_FALLDETAILS);
+            userSelectsOption(KATEGORIE, d.get(KATEGORIE));
+            userSelectsOption(STAAT_FALLDETAILS, d.get(STAAT_FALLDETAILS));
+            userSelectsOption(STADT_FALLDETAILS, d.get(STADT_FALLDETAILS));
+            userEntersInInputField(ORTBESCHREIBUNG, d.get(ORTBESCHREIBUNG));
+            userClicks(UBERNEHMEN_FALLDETAILS);
+            userSeesDialogMessage(EREIGNISORT_SAVE_MESSAGE);
+
+            userReadsFromInputText(EREIGNISORT, inputText + d.get(KATEGORIE) + " " + d.get(STAAT_FALLDETAILS)
+                   + " " + d.get(STADT_FALLDETAILS) + " " + d.get(ORTBESCHREIBUNG));
+        });
+    }
+
+    void editEreignisort(List<Map<String, String>> data) {
+        /*data.forEach(d -> {
+            String tableEntry = d.get(KATEGORIE) + " " + d.get(STAAT_FALLDETAILS)
+                    + " " + d.get(STADT_FALLDETAILS) + " " + d.get(ORTBESCHREIBUNG);
+            String tableText = $(ereignisort).getText();
+
+            userClicksOptionEntryInTable(BEARBEITEN, tableEntry, EREIGNISORT,"");
+            userSelectsOption(KATEGORIE, d.get(KATEGORIE_U));
+            userSelectsOption(STAAT_FALLDETAILS, d.get(STAAT_FALLDETAILS_U));
+            userSelectsOption(STADT_FALLDETAILS, d.get(STADT_FALLDETAILS_U));
+            userEntersInInputField(ORTBESCHREIBUNG, d.get(ORTBESCHREIBUNG_U));
+            userClicks(UBERNEHMEN_FALLDETAILS);
+            userSeesDialogMessage(EREIGNISORT_SAVE_MESSAGE);
+
+            String tableEntryUpdated = d.get(KATEGORIE_U) + " " + d.get(STAAT_FALLDETAILS_U)
+                    + " " + d.get(STADT_FALLDETAILS_U) + " " + d.get(ORTBESCHREIBUNG_U);
+
+            userReadsFromInputText(EREIGNISORT, tableText.replaceAll(tableEntry, tableEntryUpdated));
+        });*/
+    }
+
+    void deleteEreignisort(List<Map<String, String>> data) {
+        /*data.forEach(d -> {
+            String tableEntry = d.get(KATEGORIE) + " " + d.get(STAAT_FALLDETAILS)
+                    + " " + d.get(STADT_FALLDETAILS) + " " + d.get(ORTBESCHREIBUNG);
+            String tableText = $(ereignisort).getText();
+
+            userClicksOptionEntryInTable(LOSCHEN, tableEntry, EREIGNISORT, "");
+            userClicks(ENTFERNEN_FALLDETAILS);
+            userSeesDialogMessage(EREIGNISORT_DELETE_MESSAGE);
+
+            if(tableText.replaceAll(tableEntry, "").trim().equals(""))
+                userReadsFromInputText(EREIGNISORT, KEINE_EINTRAGE_ENTHALTEN);
+            else
+                userReadsFromInputText(EREIGNISORT, tableText.replaceAll(tableEntry, "").trim());
+
+        });*/
+    }
+
+}

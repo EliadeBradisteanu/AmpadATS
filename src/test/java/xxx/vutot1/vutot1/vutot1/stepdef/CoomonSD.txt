@@ -1,0 +1,126 @@
+package de.bund.bka.idvk.vutot.steps;
+
+import de.bund.bka.idvk.vutot.pages.CommonPage;
+import lombok.extern.slf4j.Slf4j;
+import net.thucydides.core.annotations.Step;
+
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@SuppressWarnings("unused")
+public class CommonS {
+
+    private CommonPage commonPage;
+
+    @Step("Der Benutzer ruft die Anmeldeseite auf")
+    public void userOpensVutotLoginPage() {
+        commonPage.userOpensVutotLoginPage();
+    }
+
+    @Step("Der Benutzer gibt in Eingabefeld {0} {0} ein")
+    public void userEntersInInputField(String labelText, String inputText) {
+        commonPage.userEntersInInputField(labelText, inputText);
+    }
+
+    @Step("Der Benutzer klickt auf {0} und gibt in Eingabefeld {0} {0} ein")
+    public void userClicksAndEntersInInputField(String elementToClick, String labelText, String inputText) {
+        commonPage.userClicksAndEntersInInputField(elementToClick, labelText, inputText);
+    }
+
+    @Step("Der Benutzer gibt in Eingabefeld {0} die Werte min {0} und max {0} ein")
+    public void userEntersInInputFieldValuesForMinAndMax(String labelText, String min, String max) {
+        commonPage.userEntersInInputFieldValuesForMinAndMax(labelText, min, max);
+    }
+
+    @Step("Der Benutzer liest aus das Eingabefeld {string} den text {string}")
+    public void userReadsFromInputText(String labelText, String inputText) {
+        commonPage.userReadsFromInputText(labelText, inputText);
+    }
+
+    @Step("Der Benutzer gibt in das Mehrfacheingabefeld {0} den(ie) Wert(e) ein {0}")
+    public void userEntersInMultiInputField(String labelText, List<String> data) {
+        commonPage.userEntersInMultiInputField(labelText, data);
+    }
+
+    @Step("Der Benutzer entfernt aus das Mehrfachelementl {0} den(ie) Wert(e) {0}")
+    public void userDeletesValuesFromMultielement(String labelText, List<String> options) {
+        commonPage.userDeletesValuesFromMultiElement(labelText, options);
+    }
+
+    @Step("Der Benutzer klickt auf {0}")
+    public void userClicks(String btnText) {
+        commonPage.userClicks(btnText);
+    }
+
+    @Step("Der Benutzer klickt {0} für den {0} x-te Eintrag {0} in der Tabelle {0}")
+    public void userClicksOptionForNthEntryInTable(String option,  String nthElement, String tableEntry, String labelText) {
+        commonPage.userClicksOptionForNthEntryInTable(option, nthElement, tableEntry, labelText, "");
+    }
+
+    @Step("Der Benutzer {0} in der Tabelle {0} die Daten")
+    public void userOperaratesDataInTheTable(String operation, String tableLabel, List<Map<String, String>> data) {
+        commonPage.userOperatesDataInTheTable(operation, tableLabel, data);
+    }
+
+    @Step("Der Benutzer sucht {0} in das Suchfeld {0} der Tabelle {0} und sieht das Ergebnis")
+    public void userFiltersTableEntriesByColumnSearch(String searchText, String searchField, String labelText) {
+        commonPage.userFiltersTableEntriesByColumnSearch(searchText, searchField, labelText);
+    }
+
+    @Step("Der Benutzer sieht eine Fehlermeldung")
+    public void userSeesErrorMessage() {
+        commonPage.userSeesErrorMessage();
+    }
+
+    @Step("Der Benutzer sieht die Meldung {0}")
+    public void userSeesDialogMessage(String errorText) {
+        commonPage.userSeesDialogMessage(errorText);
+    }
+
+    @Step("Der Benutzer klickt das Menue {0}")
+    public void userClicksMenu(String menuText) {
+        commonPage.userClicksMenu(menuText);
+    }
+
+    @Step("Der Benutzer klickt das Untermenue {0}")
+    public void userClicksSubmenu(String menuText) {
+        commonPage.userClicksSubmenu(menuText);
+    }
+
+    @Step("Der Benutzer wählt den Tab {0}")
+    public void userChoosesTab(String tabText) {
+        commonPage.userChoosesTab(tabText);
+    }
+
+    @Step("Der Benutzer {0} UnterTab(s) aus {0} mit den folgenden Daten")
+    public void userOperatesSubTabsWithData(String operation, String tabLabel, List<Map<String, String>> data) {
+        commonPage.userOperatesSubTabsWithData(operation, tabLabel, data);
+    }
+
+    @Step("Der Benutzer wählt aus der Dropdown-Liste {0} die Möglichkeit {0}")
+    public void userSelectsOption(String labelText, String selectText) {
+        commonPage.userSelectsOption(labelText, selectText);
+    }
+
+    @Step("Der Benutzer wählt aus der Dropdown-Liste für Mehrfachauswahl {0} die Möglichkeit(en) {0}")
+    public void userMultiselectsOptions(String labelText, List<String> options) {
+        commonPage.userMultiselectsOptions(labelText, options);
+    }
+
+    @Step("Der Benutzer klickt {0} und wählt aus der Dropdown-Liste für Mehrfachauswahl {0} die Möglichkeit(en)")
+    public void userClicksAndMultiselectsOptions(String elementToClick, String labelText, List<String> data) {
+        commonPage.userClicksAndMultiselectsOptions(elementToClick, labelText, data);
+    }
+
+    @Step("Der Benutzer sucht {0} in der Dropdown-Liste für Mehrfachauswahl {0} und wählt die Möglichkeit(en) {0}")
+    public void userMultiselectsOptionsBySearch(String searchText, String labelText, List<String> options) {
+        commonPage.userMultiselectsOptionsBySearch(searchText, labelText, options);
+    }
+
+    @Step("Der Benutzer scrollt nach {0} {0}")
+    public void userScrollsBy(String x, String y) {
+        commonPage.userScrollsBy(x, y);
+    }
+
+}

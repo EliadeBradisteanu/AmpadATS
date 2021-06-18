@@ -1,0 +1,475 @@
+package de.bund.bka.idvk.vutot.pages;
+
+import de.bund.bka.idvk.vutot.util.BasePageFactory;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
+import net.serenitybdd.core.annotations.findby.By;
+import net.serenitybdd.core.pages.WebElementFacade;
+import net.thucydides.core.pages.Pages;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static de.bund.bka.idvk.vutot.util.Constants.*;
+import static de.bund.bka.idvk.vutot.util.Utils.getClassNameByFieldName;
+import static de.bund.bka.idvk.vutot.util.Utils.getCssValueForElementText;
+
+@EqualsAndHashCode(callSuper = true)
+@Slf4j
+@Data
+public class CommonPage extends BasePage {
+
+    static {
+        BasePageFactory.register(CommonPage.class.getSimpleName(), new CommonPage(), CommonPage.class.getDeclaredFields());
+    }
+
+    private String menuItems = ".ui-menu-list.ui-helper-reset li";
+    private String tabs = ".ui-tabs-header";
+
+    @FindBy(className = "ui-messages-error")
+    private WebElementFacade errorMessage;
+
+    @FindBy(className = "ui-growl-message")
+    private WebElementFacade messageDialog;
+
+    public String getFieldValueFromThisClass(String fieldName){
+        Field field = Arrays.stream(CommonPage.class.getDeclaredFields())
+                .filter(f -> f.getName().equals(fieldName))
+                .findFirst().orElse(null);
+
+        try {
+            assert field != null;
+            return (String) field.get(this);
+        } catch (IllegalAccessException e) {
+            log.error("Sorry, unable to get the field value" , e);
+        }
+
+        return null;
+    }
+
+    public void userOpensVutotLoginPage() { openLoginPage(); }
+
+    public void userEntersInInputField(String labelText, String inputText) {
+        String input = getCssValueForElementText(labelText);
+
+        waitForElement($(input));
+
+        if(inputText == null)
+            inputText = "";
+
+        typeInto($(input), inputText);
+
+        //for date picker, need to click outside the element
+        moveToAndClick(getBody(), 0,0);
+    }
+
+    public void userClicksAndEntersInInputField(String elementToClick, String labelText, String inputText) {
+        userClicks(elementToClick);
+        userEntersInInputField(labelText, inputText);
+    }
+
+    public void userEntersInInputFieldValuesForMinAndMax(String labelText, String min, String max) {
+        String input = getCssValueForElementText(labelText);
+
+        waitForElement($(input));
+        typeInto($(input + "_von_input"), min);
+        typeInto($(input+"_bis_input"), max);
+
+        Assert.assertEquals($(input + "_von_hinput").getAttribute("value") +
+                $(input + "_bis_hinput").getAttribute("value"), min + max);
+    }
+
+    public void userReadsFromInputText(String labelText, String inputText) {
+        String input = getCssValueForElementText(labelText);
+
+        Assert.assertEquals(inputText.replaceAll("[\\t\\n\\r]+",""),
+                getDisplayedWEF(input).getText().replaceAll("[\\t\\n\\r]+",""));
+    }
+
+    public void userEntersInMultiInputField(String labelText, List<String> data) {
+        String input = getCssValueForElementText(labelText);
+
+        waitForElement($(input));
+        data.forEach(d -> {
+            typeInto($(input + "_input"), d);
+            pressEnter($(input + "_input"));
+        });
+
+        String tagsText = $(input).getText().replaceAll("[\\t\\n\\r]+","");
+        Assert.assertEquals(StringUtils.join(data, ""), tagsText);
+    }
+
+    public void userDeletesValuesFromMultiElement(String labelText, List<String> options) {
+        String multiSelect = getCssValueForElementText(labelText);
+
+        //tags to delete
+        List<WebElementFacade> tags=findAll(By.cssSelector(multiSelect + " li"));
+
+        List<String> tagsToCompare = tags.stream().filter(t -> options.stream()
+                .noneMatch(o -> t.getText().equals(o)))
+                .map(WebElementFacade::getText)
+                .collect(Collectors.toList());
+
+        //delete tags
+        getWEFsFromListByText(tags, options).forEach(e -> e.thenFindAll(By.cssSelector(" span"))
+                .stream()
+                .filter(ee -> ee.getText().length() == 0)
+                .collect(Collectors.toList())
+                .forEach(WebElementFacade::click));
+
+        //assert list of tags after tag(s) delete
+        pause(300); //when deleting all tags, find by ... li gives sometimes Stale Exception
+        Assert.assertEquals(tagsToCompare,
+                findAll(By.cssSelector(multiSelect + " li")).stream().map(WebElementFacade::getText).collect(Collectors.toList()));
+    }
+
+    public void userClicks(String buttonLabel) {
+        //case when there are 3 options (Nicht gewählt, Ja, Nein)
+       if(Arrays.stream(new String[]{NICHT_GEWAHLT, JA, NEIN, FEHLT, VORHANDEN}).anyMatch(buttonLabel::contains)){
+            String button = getCssValueForElementText(buttonLabel.substring(0,buttonLabel.lastIndexOf("_")));
+            List<WebElementFacade> buttons=findAll(By.cssSelector(button + " div"));
+
+            String buttonText = buttonLabel.substring(buttonLabel.lastIndexOf("_") + 1);
+
+            //click Vorhanden twice because it's preselected when the menu opens
+            if(buttonText.equals(VORHANDEN))  clickOn(getWEFFromListByText(buttons, buttonText));
+
+            clickOn(getWEFFromListByText(buttons, buttonText));
+        } else {
+            String button = getCssValueForElementText(buttonLabel);
+            waitForElement($(button));
+             clickOn($(button));
+        }
+    }
+
+    public static void main(String[] args) {
+        List<String> l= Arrays.asList("as","as","as");
+
+        String s = l.stream()
+                .filter(e -> e.replaceAll("[\\t\\n\\r]+", " ").equals("as"))
+                .skip(Long.parseLong("2") -1)
+                .findAny().orElse(null);
+
+        System.out.println(s);
+    }
+
+    public void userClicksOptionForNthEntryInTable(String option, String nthElement, String tableEntry, String labelText, String textToRemove) {
+        String row = getCssValueForElementText(labelText) + " tr";
+        WebElementFacade entry;
+
+        if(textToRemove.length() == 0){
+             // entry = getWEFFromListByText(findAll(By.cssSelector("#tab_main\\:ereignisortListvutotAkte_falldetails_data tr")), tableEntry);
+            entry = getWEFFromListByTextSkipingNElements(findAll(By.cssSelector(row)), tableEntry, Long.parseLong(nthElement));
+        } else{
+            //CHANGE METHOD
+            entry = getWEFFromListByTextRemovingText(findAll(By.cssSelector("row")), tableEntry, textToRemove);
+        }
+
+        if(option.equals(BEARBEITEN))
+            clickOn(entry.thenFindAll(By.cssSelector("a")).get(0));
+        else if(option.equals(LOSCHEN))
+            clickOn(entry.thenFindAll(By.cssSelector("a")).get(1));
+    }
+
+    public void userOperatesDataInTheTable(String operation, String tableLabel, List<Map<String, String>> data) {
+        String className = getClassNameByFieldName(tableLabel);
+
+        switch (operation){
+            case ERFASST: {
+                switch (className){
+                    case FALLDETAILSPAGE: {
+                        FalldetailsPage falldetailsPage = Pages.instrumentedPageObjectUsing(FalldetailsPage.class, getDriver());
+                        falldetailsPage.insertEreignisort(data);
+                    }break;
+                    case DIENSTSELLEPAGE: {
+                        DienststellePage dienststellePage = Pages.instrumentedPageObjectUsing(DienststellePage.class, getDriver());
+                        dienststellePage.insertDienstselle(data);
+                    }break;
+                    case PERSONENBESCHREIBUNGPAGE: {
+                        PersonenbeschreibungPage personenbeschreibungPage = Pages.instrumentedPageObjectUsing(PersonenbeschreibungPage.class, getDriver());
+                        if(tableLabel.equals(KORPERLICHE_MERKMALE_TABLE))
+                            personenbeschreibungPage.insertKorperlicheMerkmale(data);
+                        else
+                            personenbeschreibungPage.insertMerkmale(data);
+                    }break;
+                    case BEKLEIDUNGPAGE: {
+                        BekleidungPage bekleidungPage = Pages.instrumentedPageObjectUsing(BekleidungPage.class, getDriver());
+                        bekleidungPage.insertBekleidungsmerkmal(data);
+                    }break;
+                    case GEGENSTANDPAGE: {
+                        GegenstandPage gegenstandPage = Pages.instrumentedPageObjectUsing(GegenstandPage.class, getDriver());
+                        gegenstandPage.insertGegenstand(data);
+                    }break;
+                    default: log.error("Invalid classname");break;
+                }
+            }break;
+            case BEARBEITET:{
+                switch (className){
+                    case FALLDETAILSPAGE: {
+                        FalldetailsPage falldetailsPage = Pages.instrumentedPageObjectUsing(FalldetailsPage.class, getDriver());
+                        falldetailsPage.editEreignisort(data);
+                    }break;
+                    case DIENSTSELLEPAGE: {
+                        DienststellePage dienststellePage = Pages.instrumentedPageObjectUsing(DienststellePage.class, getDriver());
+                        dienststellePage.editDienstselle(data);
+                    }break;
+                    case PERSONENBESCHREIBUNGPAGE: {
+                        PersonenbeschreibungPage personenbeschreibungPage = Pages.instrumentedPageObjectUsing(PersonenbeschreibungPage.class, getDriver());
+                        if(tableLabel.equals(KORPERLICHE_MERKMALE_TABLE))
+                            personenbeschreibungPage.editKorperlicheMerkmale(data);
+                        else
+                            personenbeschreibungPage.editMerkmale(data);
+                    }break;
+                    case BEKLEIDUNGPAGE: {
+                        BekleidungPage bekleidungPage = Pages.instrumentedPageObjectUsing(BekleidungPage.class, getDriver());
+                        bekleidungPage.editBekleidungsmerkmal(data);
+                    }break;
+                    case GEGENSTANDPAGE: {
+                        GegenstandPage gegenstandPage = Pages.instrumentedPageObjectUsing(GegenstandPage.class, getDriver());
+                        gegenstandPage.editGegenstand(data);
+                    }break;
+                    default: log.error("Invalid classname");break;
+                }
+            }break;
+            case LOSCHT:{
+                switch (className){
+                    case FALLDETAILSPAGE: {
+                        FalldetailsPage falldetailsPage = Pages.instrumentedPageObjectUsing(FalldetailsPage.class, getDriver());
+                        falldetailsPage.deleteEreignisort(data);
+                    }break;
+                    case DIENSTSELLEPAGE: {
+                        DienststellePage dienststellePage = Pages.instrumentedPageObjectUsing(DienststellePage.class, getDriver());
+                        dienststellePage.deleteDienstselle(data);
+                    }break;
+                    case PERSONENBESCHREIBUNGPAGE: {
+                        PersonenbeschreibungPage personenbeschreibungPage = Pages.instrumentedPageObjectUsing(PersonenbeschreibungPage.class, getDriver());
+                        personenbeschreibungPage.deleteMerkmale(data);
+                    }break;
+                    default: log.error("Invalid classname");break;
+                }
+            }break;
+            default: log.error("Invalid operation");break;
+        }
+    }
+
+    public void userFiltersTableEntriesByColumnSearch(String searchText, String searchField, String labelText) {
+        String table = getCssValueForElementText(labelText);
+
+        List<WebElementFacade> allEntries=findAll(By.cssSelector(table + " tr"));
+        List<String> filteredUiOptions = allEntries.stream()
+                .filter(e -> e.getText().toLowerCase().contains(searchText.toLowerCase()))
+                .map(WebElementFacade::getText)
+                .collect(Collectors.toList());
+
+        WebElementFacade searchInput = (WebElementFacade) findAll(By.cssSelector("thead th"))
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .filter(e -> e.getText().equals(searchField))
+                .map(e -> e.find(By.cssSelector(" input")))
+                .findFirst().orElse(null);
+
+        typeInto(searchInput, searchText);
+        pause(1000);
+
+        allEntries=findAll(By.cssSelector(table + " tr"));
+
+         //compare filtered list with ui filterted list
+         Assert.assertEquals(filteredUiOptions, allEntries.stream().map(WebElementFacade::getText).collect(Collectors.toList()));
+
+        //clear search input to display all options again
+        assert searchInput != null;
+        searchInput.clear();
+
+        pause(3000);
+    }
+
+    public void userSeesErrorMessage() {
+        waitForElement(errorMessage);
+        Assert.assertEquals(LOGIN_ERROR_MESSAGE,errorMessage.getText());
+    }
+
+    public void userSeesDialogMessage(String messageText) {
+        waitForElement(messageDialog);
+        Assert.assertEquals(messageText,messageDialog.getText().replaceAll("[\\t\\n\\r]+"," "));
+    }
+
+    public void userClicksMenu(String menuText) {
+        List<WebElementFacade> menus = findAll(By.cssSelector(menuItems)).stream()
+                                                                          .filter(WebElementFacade::isDisplayed)
+                                                                          .collect(Collectors.toList());
+
+        waitForListOfElement(menus);
+        pause(500);
+        clickOn(getWEFFromListByText(menus, menuText));
+    }
+
+    public void userClicksSubmenu(String menuText) {
+        switch (menuText) {
+            case NEUERFASSUNG:
+            case UBERSICHT_RECHERCHE:
+                userClicksMenu(PERSONEN);
+                break;
+            case FAQ_VERWALTUNG:
+                userClicksMenu(ADMINISTRATION);
+                break;
+            default: break;
+        }
+
+        pause(1000);
+        userClicksMenu(menuText);
+    }
+
+    public void userChoosesTab(String tabText) {
+        List<WebElementFacade> tabs = findAll(By.cssSelector(this.tabs)).stream()
+                                                                   .filter(WebElementFacade::isDisplayed)
+                                                                   .collect(Collectors.toList());
+        waitForListOfElement(tabs);
+        clickOn(getWEFFromListByContainingText(tabs, tabText));
+    }
+
+    public void userOperatesSubTabsWithData(String operation, String tabLabel, List<Map<String, String>> data) {
+        String className = getClassNameByFieldName(tabLabel);
+
+        switch (operation){
+            case ERFASST: {
+                switch (className){
+                    case PERSONENBESCHREIBUNGPAGE: {
+                        PersonenbeschreibungPage personenbeschreibungPage =
+                                Pages.instrumentedPageObjectUsing(PersonenbeschreibungPage.class, getDriver());
+                        personenbeschreibungPage.insertSubTabs(data);
+                    }break;
+                    case "": break;
+                    default: log.error("Invalid classname");break;
+                }
+            }break;
+            case BEARBEITET:{
+                switch (className){
+                    case PERSONENBESCHREIBUNGPAGE: {
+                        PersonenbeschreibungPage personenbeschreibungPage =
+                                Pages.instrumentedPageObjectUsing(PersonenbeschreibungPage.class, getDriver());
+                        personenbeschreibungPage.editSubTabs(data);
+                    }break;
+                    case "": break;
+                    default: log.error("Invalid classname");break;
+                }
+            }break;
+            case LOSCHT:{
+                switch (className){
+                    case PERSONENBESCHREIBUNGPAGE: {
+                        PersonenbeschreibungPage personenbeschreibungPage =
+                                Pages.instrumentedPageObjectUsing(PersonenbeschreibungPage.class, getDriver());
+                        personenbeschreibungPage.deleteSubTabs(data);
+                    }break;
+                    case "": break;
+                    default: log.error("Invalid classname");break;
+                }
+            }break;
+            default: log.error("Invalid operation");break;
+        }
+    }
+
+    public void userSelectsOption(String labelText, String selectText) {
+        String select = getCssValueForElementText(labelText);
+
+        waitForElement($(select));
+        clickOn($(select));
+
+        List<WebElementFacade> options=findAll(By.cssSelector(select + "_items li"));
+
+        pause(200);
+        getWEFFromListByText(options, selectText).click();
+        Assert.assertEquals(selectText,$(select + "_label").getText());
+    }
+
+    public void userMultiselectsOptions(String labelText, List<String> options) {
+        String multiSelect = getCssValueForElementText(labelText);
+
+        waitForElement($(multiSelect));
+        clickOn($(multiSelect));
+
+        List<WebElementFacade> uiOptions=findAll(By.cssSelector(multiSelect + "_panel li"));
+
+        //select options
+        getWEFsFromListByText(uiOptions, options).forEach(WebElementFacade::click);
+
+        //click Close (x)
+        getDisplayedWEF(".ui-icon.ui-icon-circle-close").click();
+
+        Assert.assertEquals($(multiSelect).getText(), StringUtils.join(options,"\n"));
+    }
+
+    public void userClicksAndMultiselectsOptions(String elementToClick, String labelText, List<String> data) {
+        userClicks(elementToClick);
+        userMultiselectsOptions(labelText, data);
+    }
+
+    public void userMultiselectsOptionsBySearch(String searchText, String labelText, List<String> options) {
+        String multiSelect = getCssValueForElementText(labelText);
+
+        waitForElement($(multiSelect));
+        clickOn($(multiSelect));
+
+        List<WebElementFacade> allSelectOptions=findAll(By.cssSelector(multiSelect + "_panel li"));
+        List<WebElementFacade> filteredUiOptions = allSelectOptions.stream()
+                                                            .filter(f -> f.getText().toLowerCase().contains(searchText.toLowerCase()))
+                                                            .collect(Collectors.toList());
+
+        WebElementFacade searchInput = Objects.requireNonNull(
+                                           findAll(By.cssSelector(".ui-selectcheckboxmenu-filter-container input")).stream()
+                                              .filter(WebElement::isDisplayed)
+                                              .findFirst().orElse(null));
+
+        typeInto(searchInput, searchText);
+
+        //select option after filter by search
+        allSelectOptions=findAll(By.cssSelector(multiSelect + "_panel li")).stream()
+                                                                           .filter(WebElement::isDisplayed)
+                                                                           .collect(Collectors.toList());
+
+         //compare filtered list with ui filterted list
+        Assert.assertEquals(filteredUiOptions.stream().map(WebElementFacade::getText).collect(Collectors.toList()),
+                allSelectOptions.stream().map(WebElementFacade::getText).collect(Collectors.toList()));
+
+        //select options
+        getWEFsFromListByText(allSelectOptions, options).forEach(WebElementFacade::click);
+
+        //clear search input to display all options again
+        searchInput.clear();
+
+        //click Close (x)
+        getDisplayedWEF(".ui-icon.ui-icon-circle-close").click();
+
+        Assert.assertEquals($(multiSelect).getText(), StringUtils.join(options,"\n"));
+    }
+
+    public void userScrollsBy(String x, String y) {
+        scrollBy(Integer.parseInt(x), Integer.parseInt(y));
+    }
+
+
+    /* --- UTILS ---  */
+
+    //used for getting x from TabName(x)
+    String getNrFromTabName(String partialTabName){
+        return Objects.requireNonNull(findAll(By.cssSelector(this.getTabs())).stream()
+                .filter(e -> e.getText().contains(partialTabName))
+                .findAny().orElse(null)).getText().replaceAll("\\D" ,"");
+    }
+
+    List<WebElementFacade> getWEFSubTabs(String tabCssValue){
+        return $(tabCssValue)
+                .thenFindAll(By.cssSelector("ul li")).stream()
+                .filter(WebElementFacade::isDisplayed)
+                .filter(e -> !e.getText().isEmpty())
+                .collect(Collectors.toList());
+    }
+}
