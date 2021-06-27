@@ -25,7 +25,6 @@ public class CommonPage extends BasePage{
 
     public void userOpenPage() {
         this.open();
-
     }
 
     public void userEntersInInputField(String labelText, String inputText) {
