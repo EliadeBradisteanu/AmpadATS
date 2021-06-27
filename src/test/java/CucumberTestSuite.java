@@ -14,3 +14,6 @@ import org.junit.runner.RunWith;
         tags = "@Ampada" //{"@Ampada", "not @End2End" , "not @SmokeTest"}
 )
 public class CucumberTestSuite {}
+
+
+

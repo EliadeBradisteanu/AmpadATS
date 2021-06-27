@@ -10,7 +10,8 @@ import java.util.List;
 
 import static util.Constants.RED;
 
-@DefaultUrl("http://id.ampada.com/auth/realms/Ampada-Prod/protocol/openid-connect/auth?client_id=ams-prod&redirect_uri=http%3A%2F%2Ftimesheet.ampada.com%2F&state=40aa903a-6552-4fcd-86d8-5103b2785ef4&response_mode=fragment&response_type=code&scope=openid&nonce=736ea01f-deb6-4070-93ab-3a9a1540e76b")
+@DefaultUrl("http://tool.ampada.com:9173/")
+//@DefaultUrl("http://www.google.com")
 public class CommonPage extends BasePage{
 
     @FindBy(css = ".form-group")
@@ -24,6 +25,7 @@ public class CommonPage extends BasePage{
 
     public void userOpenPage() {
         this.open();
+
     }
 
     public void userEntersInInputField(String labelText, String inputText) {
