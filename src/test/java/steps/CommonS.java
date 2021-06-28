@@ -31,4 +31,9 @@ public class CommonS {
     public void theUserClicksTheButton(String buttonText) {
         commonPage.theUserClicksTheButton(buttonText);
     }
+
+    @Step("the user clicks the menu {0}")
+    public void theUserClicksTheMenu(String menuText) {
+        commonPage.theUserClicksTheMenu(menuText);
+    }
 }

@@ -1,6 +1,0 @@
-#general
-username=haghnazarian
-password=Test123
-
-
-

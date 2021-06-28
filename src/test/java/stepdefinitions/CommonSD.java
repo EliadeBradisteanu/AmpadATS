@@ -46,4 +46,9 @@ public class CommonSD {
     }
 
 
+    @Then("the user clicks the menu {string}")
+    public void theUserClicksTheMenu(String menuText) {
+        commonS.theUserClicksTheMenu(menuText);
+        logger.info("the user clicks the menu  " + menuText);
+    }
 }

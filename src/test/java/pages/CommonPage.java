@@ -23,6 +23,9 @@ public class CommonPage extends BasePage{
     @FindBy(css = "#input-error")
     private WebElement errorMessage;
 
+    @FindBy(css=".menu-item")
+    private List<WebElement> menus;
+
     public void userOpenPage() {
         this.open();
     }
@@ -53,5 +56,11 @@ public class CommonPage extends BasePage{
         WebElement foundInput =
                 getWebElementFromListByAttribute(inputs1, "value", buttonText);
         foundInput.click();
+    }
+
+    public void theUserClicksTheMenu(String menuText) {
+        WebElement webElementFromListByText = getWebElementFromListByText(menus, menuText);
+        webElementFromListByText.click();
+        pause(5000);
     }
 }
