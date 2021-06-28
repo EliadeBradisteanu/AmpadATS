@@ -1,10 +1,22 @@
 package pages;
 
-import net.thucydides.core.annotations.DefaultUrl;
+import org.junit.Assert;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 
+import static util.Constants.LOGGEDIN_USER;
 
-@DefaultUrl("http://id.ampada.com/auth/realms/Ampada-Prod/protocol/openid-connect/auth?client_id=ams-prod&redirect_uri=http%3A%2F%2Ftimesheet.ampada.com%2F&state=40aa903a-6552-4fcd-86d8-5103b2785ef4&response_mode=fragment&response_type=code&scope=openid&nonce=736ea01f-deb6-4070-93ab-3a9a1540e76b")
 public class LoginPage extends CommonPage{
 
+    @FindBy(css = ".m-12")
+    private WebElement loggedInUser;
 
+    public void theUserLogsInIntoTheAmpadaSite() {
+        this.open();
+        userEntersInInputField("Username or email", propertyManager.getUSERNAME());
+        userEntersInInputField("Password", propertyManager.getPASSWORD());
+        theUserClicksTheButton("Sign In");
+
+        Assert.assertEquals(LOGGEDIN_USER, loggedInUser.getText());
+    }
 }

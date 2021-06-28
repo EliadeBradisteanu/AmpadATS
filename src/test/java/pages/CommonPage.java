@@ -10,8 +10,9 @@ import java.util.List;
 
 import static util.Constants.RED;
 
-@DefaultUrl("http://tool.ampada.com:9173/")
+//@DefaultUrl("http://tool.ampada.com:9073/")
 public class CommonPage extends BasePage{
+
 
     @FindBy(css = ".form-group")
     private List<WebElement> inputs;

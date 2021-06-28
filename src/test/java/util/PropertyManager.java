@@ -9,9 +9,10 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertyManager {
-    private static final String PROPERTY_FILE_PATH = "./serenity.properties";
+    private static final String PROPERTY_FILE_PATH = "C:/Users/eliad/IdeaProjects/AmpadATS/src/test/resources/general.properties";
 
-    private static final String PASSWORD_FOR_USERS = "password_for_users";
+    private static final String USERNAME = "username";
+    private static final String PASSWORD = "password";
 
     private static PropertyManager instance;
     private static final Object lock = new Object();
@@ -39,9 +40,11 @@ public class PropertyManager {
         }
     }
 
-    public String getPasswordForAllUsers() {
-        return properties.getProperty(PASSWORD_FOR_USERS);
+    public String getUSERNAME() {
+        return properties.getProperty(USERNAME);
     }
 
-
+    public String getPASSWORD() {
+        return properties.getProperty(PASSWORD);
+    }
 }

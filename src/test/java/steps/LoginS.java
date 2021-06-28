@@ -6,5 +6,7 @@ public class LoginS {
 
     private LoginPage loginPage;
 
-
+    public void theUserLogsInIntoTheAmpadaSite() {
+        loginPage.theUserLogsInIntoTheAmpadaSite();
+    }
 }
