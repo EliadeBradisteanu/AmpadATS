@@ -8,8 +8,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import util.PropertyManager;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class BasePage extends PageObject {
@@ -53,7 +55,6 @@ public class BasePage extends PageObject {
                 i = elements.size();
             }
         }
-        System.out.println(el.toString());
         return el;
     }
 
@@ -130,7 +131,7 @@ public class BasePage extends PageObject {
         String selector = splitSelector[1].split("\\],\\s")[0];
         selector = selector.replaceFirst("\\].*?", "").trim();
 
-        if (selector.substring(selector.length()-1).equals("]")) {
+        if (selector.endsWith("]")) {
             selector = selector.substring(0, selector.length()-1);
         }
 
