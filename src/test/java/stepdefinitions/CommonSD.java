@@ -51,4 +51,5 @@ public class CommonSD {
         commonS.theUserClicksTheMenu(menuText);
         logger.info("the user clicks the menu  " + menuText);
     }
+
 }

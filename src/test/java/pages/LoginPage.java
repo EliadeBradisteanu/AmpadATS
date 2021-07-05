@@ -1,7 +1,7 @@
 package pages;
 
+import net.serenitybdd.core.pages.WebElementFacade;
 import org.junit.Assert;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 import static util.Constants.LOGGEDIN_USER;
@@ -9,7 +9,7 @@ import static util.Constants.LOGGEDIN_USER;
 public class LoginPage extends CommonPage{
 
     @FindBy(css = ".m-12")
-    private WebElement loggedInUser;
+    private WebElementFacade loggedInUser;
 
     public void theUserLogsInIntoTheAmpadaSite() {
         this.open();
@@ -19,4 +19,5 @@ public class LoginPage extends CommonPage{
 
         Assert.assertEquals(LOGGEDIN_USER, loggedInUser.getText());
     }
+
 }

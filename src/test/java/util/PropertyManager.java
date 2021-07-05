@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertyManager {
-    private static final String PROPERTY_FILE_PATH = "C:/Users/eliad/IdeaProjects/AmpadATS/src/test/resources/general.properties";
+    private static final String PROPERTY_FILE_PATH = "C:\\Users\\josseline.youbi.AMPADA\\IdeaProjects\\AmpadATS\\src\\test\\resources\\general.properties";
 
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";

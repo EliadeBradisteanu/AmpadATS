@@ -23,7 +23,7 @@ public class CommonPage extends BasePage{
     @FindBy(css = "#input-error")
     private WebElement errorMessage;
 
-    @FindBy(css=".menu-item")
+    @FindBy(css=".ui-menuitem-text")
     private List<WebElement> menus;
 
     public void userOpenPage() {
@@ -61,6 +61,5 @@ public class CommonPage extends BasePage{
     public void theUserClicksTheMenu(String menuText) {
         WebElement webElementFromListByText = getWebElementFromListByText(menus, menuText);
         webElementFromListByText.click();
-        pause(5000);
     }
 }
